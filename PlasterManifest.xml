@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<plasterManifest schemaVersion="1.0" 
+  xmlns="http://www.microsoft.com/schemas/PowerShell/Plaster/v1">
+  <metadata>
+    <name>PSModuleScaffold</name>
+    <id>52cdefd2-181c-4f45-8bd6-3e5c291abdf9</id>
+    <version>0.1.0</version>
+    <title>PowerShell Module Scaffold</title>
+    <description></description>
+    <author>Roberto Desideri</author>
+    <tags></tags>
+  </metadata>
+  <parameters>
+    <parameter name="ModuleName" type="text" prompt="Name of your module" default="${PLASTER_DestinationName}"/>
+    <parameter name="ModuleDesc" type="text" prompt="Brief description on this module" default="${PLASTER_ModuleName}"/>
+    <parameter name="GitHubRepo" type="text" prompt="Github repo name for this module" default="${PLASTER_PARAM_ModuleName}"/>
+    <parameter name="GitHubUserName" type="user-fullname" prompt="GitHub username" default="${PLASTER_PARAM_FullName}"/>
+    <parameter name="FullName" type="text" prompt="Module author's' name" default="${PLASTER_PARAM_GitHubUserName}"/>
+    <parameter name="Version" type="text" prompt="Initial module version" default="0.0.1" />
+  </parameters>
+  <content>
+    <message>      Creating folder structure    </message>
+    <file source='' destination='.vscode'/>
+    <file source='' destination='docs'/>
+    <file source='' destination='docs\images'/>
+    <file source='' destination='dist'/>
+    <file source='' destination='scripts'/>
+    <file source='' destination='src'/>
+    <file source='' destination='src\public'/>
+    <file source='' destination='src\private'/>
+    <file source='' destination='src\classes'/>
+    <file source='' destination='src\data'/>
+    <file source='' destination='src\vendor'/>
+    <file source='' destination='test'/>
+    <file source='' destination='test\spec'/>
+    <message>      Deploying files    </message>
+    <file source='src\.gitignore.tml' destination='.gitignore'/>
+    <file source='src\appveyor.yml' destination='appveyor.yml'>
+    <file source='src\docs\about.md' destination='docs\about.md'/>
+    <file source='src\docs\acknowledgements.md' destination='docs\acknowledgements.md'/>
+    <file source='src\docs\index.md' destination='docs\index.md'/>
+    <file source='src\docs\installation.md' destination='docs\installation.md'/>
+    <file source='src\scripts\build.ps1' destination='scripts\build.pd1'/>
+    <file source='src\scripts\deploy.ps1' destination='scripts\deploy.ps1'/>
+    <file source='src\scripts\test.ps1' destination='scripts\test.ps1'/>
+    <file source='src\vscode\settings.json' destination='.vscode\settings.json'/>
+    <file source='src\test\project.test.ps1' destination='test\project.test.ps1'/>
+    <file source='src\test\help.test.ps1' destination='test\help.test.ps1'/>
+    <file source='src\test\regression.test.ps1' destination='regression.test.ps1'/>
+    <file source='src\test\unit.test.ps1' destination='unit.test.ps1'/>
+    <templateFile source='src\mkdocs.yml' destination='mkdocs.yml'/>
+    <templateFile source='src\PITCHME.md' destination='PITCHME.md'/>
+    <templateFile source='src\README.md' destination='README.md'/>
+    <templateFile source='src\LICENSE' destination='LICENSE'/>
+    <templateFile source='src\docs\about.md' destination='docs\about.md'/>
+    <templateFile source='src\docs\acknowledgements.md' destination='docs\acknowledgements.md'/>
+    <templateFile source='src\docs\index.md' destination='docs\index.md'/>
+    <templateFile source='src\docs\installation.md' destination='docs\installation.md'/>
+    <templateFile source='src\src\module.psm1' destination='src\${PLASTER_PARAM_ModuleName}.psm1'/>
+    <newModuleManifest destination='src\${PLASTER_PARAM_ModuleName}.psd1' moduleVersion='$PLASTER_PARAM_Version' rootModule='${PLASTER_PARAM_ModuleName}.psm1' author='$PLASTER_PARAM_FullName' description='$PLASTER_PARAM_ModuleDesc' encoding='UTF8-NoBOM'/>
+  </content>
+</plasterManifest>
