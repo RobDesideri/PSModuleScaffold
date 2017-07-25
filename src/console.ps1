@@ -6,18 +6,18 @@ Derived from scripts written by Warren F. (RamblingCookieMonster)
 
 [cmdletbinding()]
 param(
-    # Type of job to call
-    [Parameter(Mandatory = $true,
-        Position = 0,
-        HelpMessage = 'Task to execute (test|build|deploy). You can also pass a DSL string in the form: "test source spec function" as meaning of Task: test, CodeType: source, -TestType: spec -Tags: function')]
-    [string]
-    $TaskType,
+  # Type of job to call
+  [Parameter(Mandatory = $true,
+    Position = 0,
+    HelpMessage = 'Task to execute (test|build|deploy). You can also pass a DSL string in the form: "test source spec function" as meaning of Task: test, CodeType: source, -TestType: spec -Tags: function')]
+  [string]
+  $TaskType,
 
-    # Parameter passed to the Task
-    [Parameter(Mandatory = $false,
-        HelpMessage = 'Interactive session? (True|False)')]
-    [switch]
-    $InteractiveSession
+  # Parameter passed to the Task
+  [Parameter(Mandatory = $false,
+    HelpMessage = 'Interactive session? (True|False)')]
+  [switch]
+  $InteractiveSession
 )
 
 
@@ -45,7 +45,7 @@ $tmp__.Add("VendorFolder", @{})
 
 # Build the many vendor paths
 foreach ($v in $tmp__.Paths.Keys) {
-    $tmp__.VendorFolder.Add($v, $tmp__.Item($v) + '\vendor' )
+  $tmp__.VendorFolder.Add($v, $tmp__.Item($v) + '\vendor' )
 }
 
 # - Dependencies file
@@ -56,114 +56,127 @@ Set-Variable -Name __ -Description "Global variables for share data in project s
 
 # Parameters decoding
 if ($TaskType.Contains(' ')) {
-    $Script:Parameterized = $true
+  $Script:Parameterized = $true
 
-    $params = $TaskType.Split(' ')
+  $params = $TaskType.Split(' ')
 
-    $Script:Task = $params[0]
+  $Script:Task = $params[0]
 
-    switch ($Script:Task) {
-        "build" {
-            if ($params.Count -gt 1) {
-                $Script:BuildTask = $params[1]
-            }
-            else {
-                $Script:BuildTask = "Default"
-            }
+  switch ($Script:Task) {
+    "build" {
+      if ($params.Count -gt 1) {
+        $Script:BuildTask = $params[1]
+      }
+      else {
+        $Script:BuildTask = "Default"
+      }
+    }
+    "deploy" {
+      # TODO: Deploy parameters handler
+    }
+    "test" {
+      switch ($params.Count) {
+        1 {
+          $Script:CodeType = "build"
+          $Script:TestType = "full"
+          $Script:Tags = @()
+          $Script:TestOutPath = $Global:__.Paths.OutputFolder
         }
-        "deploy" {
-          # TODO: Deploy parameters handler
+        2 {
+          $Script:CodeType = $params[1]
+          $Script:TestType = "unit"
+          $Script:Tags = @()
         }
-        "test" {
-            switch ($params.Count) {
-                1 {
-                    $Script:CodeType = "source"
-                    $Script:TestType = "unit"
-                    $Script:Tags = @()
-                }
-                2 {
-                    $Script:CodeType = $params[1]
-                    $Script:TestType = "unit"
-                    $Script:Tags = @()
-                }
-                3 {
-                    $Script:CodeType = $params[1]
-                    $Script:TestType = $params[2]
-                    $Script:Tags = @()
-                }
-                Default {
-                    $Script:CodeType = $params[1]
-                    $Script:TestType = $params[2]
-                    $Script:Tags = @()
-                    if ($params.Count -gt 3) {
-                        for ($i = 3; $i -lt $params.Count; $i++) {
-                            $Script:Tags += $($params[$i].Replace(',', '')).Replace(' ', '')
-                        }
-                    }
-                }
-            }
+        3 {
+          $Script:CodeType = $params[1]
+          $Script:TestType = $params[2]
+          $Script:Tags = @()
         }
         Default {
-            throw "Task not found"
+          $Script:CodeType = $params[1]
+          $Script:TestType = $params[2]
+          $Script:Tags = @()
+          if ($params.Count -gt 3) {
+            for ($i = 3; $i -lt $params.Count; $i++) {
+              $Script:Tags += $($params[$i].Replace(',', '')).Replace(' ', '')
+            }
+          }
         }
+      }
     }
+    Default {
+      throw "Task not found"
+    }
+  }
 }
 else {
-    $Script:Task = $TaskType
+  $Script:Task = $TaskType
 }
 
 switch ($Script:Task) {
-    "build" {
+  "build" {
 
-        Write-Output "Starting build"
+    Write-Output "Starting build"
 
-        Write-Output "  Install Dependent Modules"
-        Install-Module InvokeBuild, PSDeploy, BuildHelpers, PSScriptAnalyzer, Pester, PSDepend -Scope CurrentUser
+    Write-Output "  Install Dependent Modules"
+    Install-Module InvokeBuild, PSDeploy, BuildHelpers, PSScriptAnalyzer, Pester, PSDepend -Scope CurrentUser
 
-        Write-Output "  Import Dependent Modules"
-        Import-Module InvokeBuild, BuildHelpers, PSScriptAnalyzer
+    Write-Output "  Import Dependent Modules"
+    Import-Module InvokeBuild, BuildHelpers, PSScriptAnalyzer
 
-        Set-BuildEnvironment
+    Set-BuildEnvironment
 
-        if ($Interactive) {
-            # Interactive overwrite actual value
-            $Script:BuildTask = Read-Host "Build task to execute? (Default is 'Default')"
-        }
-
-        Write-Output "  InvokeBuild"
-        Invoke-Build $Script:BuildTask -File "$($__.Paths.ScriptsFolder)\build.ps1" -Result result
-
-        if ($Result.Error) {
-            exit 1
-        }
-        else {
-            exit 0
-        }
+    if ($Interactive) {
+      # Interactive overwrite actual value
+      $Script:BuildTask = Read-Host "Build task to execute? (Default is 'Default')"
     }
 
-    "deploy" {
-      # TODO: Deploy handler
+    Write-Output "  InvokeBuild"
+    Invoke-Build $Script:BuildTask -File "$($Global:__.Paths.ScriptsFolder)\build.ps1" -Result
+
+    if ($Result.Error) {
+      exit 1
     }
-
-    "test" {
-
-        Write-Output "Starting test"
-
-        Write-Output "  Install Dependent Modules"
-        Install-Module Pester -Scope CurrentUser
-
-        Write-Output "  Import Dependent Modules"
-        Import-Module Pester
-
-        if ($Interactive) {
-          & "$($__.Paths.ScriptsFolder)\test.ps1"
-        }
-        else {
-          & "$($__.Paths.ScriptsFolder)\test.ps1" -CodeToTest $Script:CodeType -TestType $Script:TestType -Tags $Script:Tags
-        }
+    else {
+      exit 0
     }
-    Default {
-      & "$($__.Paths.ScriptsFolder)\test.ps1" -CodeToTest "source" -TestType "unit" -Tags @()
+  }
+
+  "deploy" {
+    Write-Output "Starting deploy"
+      
+    Write-Output "  Install Dependent Modules"
+    Install-Module PSDeploy, BuildHelpers -Scope CurrentUser
+      
+    Write-Output "  Import Dependent Modules"
+    Import-Module PSDeploy, BuildHelpers
+    
+    # BuildHelpers cmdlet
+    Set-BuildEnvironment
+
+    # PSDeploy cmdlet
+    Invoke-PSDeploy -Path "$($Global:__.Paths.ScriptsFolder)\deploy.ps1" -DeploymentRoot $Global:__.ProjectRoot
+  }
+
+  "test" {
+
+    Write-Output "Starting test"
+
+    Write-Output "  Install Dependent Modules"
+    Install-Module Pester -Scope CurrentUser
+
+    Write-Output "  Import Dependent Modules"
+    Import-Module Pester
+
+    if ($Interactive) {
+      & "$($Global:__.Paths.ScriptsFolder)\test.ps1"
     }
+    else {
+      & "$($Global:__.Paths.ScriptsFolder)\test.ps1" -CodeToTest $Script:CodeType -TestType $Script:TestType -Tags $Script:Tags -OutPath $Script:TestOutPath
+    }
+  }
+  Default {
+    & "$($Global:__.Paths.ScriptsFolder)\test.ps1" -CodeToTest "source" -TestType "unit" -Tags @()
+  }
 }
 

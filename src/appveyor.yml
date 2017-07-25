@@ -14,8 +14,10 @@ skip_commits:
 
 #Kick off the CI/CD pipeline
 build_script:
-  - ps: .\console.ps1 deploy
+  - ps: .\console.ps1 build
 
-# Disable testing/deploy (already implemented in build_script)
-test: off
-deploy: off
+test_script:
+  - ps: .\console.ps1 test
+
+deploy_script:
+  - ps: .\console.ps1 deploy
