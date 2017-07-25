@@ -36,6 +36,7 @@
     <message>      Deploying files    </message>
     <file source='src\.gitignore.tml' destination='.gitignore'/>
     <file source='src\appveyor.yml' destination='appveyor.yml'/>
+    <file source='src\console.ps1' destination='console.ps1'/>
     <file source='src\docs\about.md' destination='docs\about.md'/>
     <file source='src\docs\acknowledgements.md' destination='docs\acknowledgements.md'/>
     <file source='src\docs\index.md' destination='docs\index.md'/>
