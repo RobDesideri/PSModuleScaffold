@@ -1,8 +1,4 @@
-<#
-.Description
-Installs and loads all the required modules for the build.
-Derived from scripts written by Warren F. (RamblingCookieMonster)
-#>
+# TODO: add script CBH
 
 [cmdletbinding()]
 param(
