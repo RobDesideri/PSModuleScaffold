@@ -1,9 +1,25 @@
-# TODO: add script CBH
+<#
+.SYNOPSIS
+  Deploy script for PowerShell modules.
+.DESCRIPTION
+  Get the contents of the build folder and publish it to the PSGallery.
+.NOTES
+  Require:
+  - PSDeploy module
+  - BuildHelpers module
+    - Set-BuildEnvironment already invoked in project root path
+  - The __ global variable
+  - The ENV:NugetApiKey variable setted
+#>
+
+### =============================================================================
+### Script variables init
+### =============================================================================
+$Script:Build = $Global:__.Paths.Dir.Build
+
 ### =============================================================================
 ### Deploy Script
 ### =============================================================================
-
-# Nuget key in $ENV:NugetApiKey
 
 if (
   $ENV:BHBuildSystem -ne 'Unknown' -and 
@@ -12,7 +28,7 @@ if (
 ) {
   Deploy Module {
     By PSGalleryModule {
-      FromSource $Global:__.Paths.BuildFolder
+      FromSource $Script:Build
       To PSGallery
       WithOptions @{
         ApiKey = $ENV:NugetApiKey

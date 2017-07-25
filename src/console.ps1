@@ -1,131 +1,78 @@
-# TODO: add script CBH
+<#
+.SYNOPSIS
+  The entry-point script for all automation tasks.
+.DESCRIPTION
+  Every automation task in this project is runned by this script.
+.PARAMETER TaskType
+  The task to execute: one from build, deploy or test.
+.PARAMETER Interactive
+  Execute the selected task in the interactive mode.
+.EXAMPLE
+  PS C:\> .\automation.ps1 build
+  Build the PS module under development
+.EXAMPLE
+  PS C:\> .\automation.ps1 test
+  Execute all non-slow tests on the the builded module artifacts
+.EXAMPLE
+  PS C:\> .\automation.ps1 test -Interactive
+  Run the scripts/test interactively, for test choice.
+.EXAMPLE
+  PS C:\> .\automation.ps1 deploy
+  Publish the builded module artifacts in the PSGallery
+.INPUTS
+  None.
+.OUTPUTS
+  None.
+.NOTES
+  This script exit with 0 or 1 based on succes or not. This is for the CI/CD prosecution.
+#>
 
 [cmdletbinding()]
 param(
   # Type of job to call
   [Parameter(Mandatory = $true,
     Position = 0,
-    HelpMessage = 'Task to execute (test|build|deploy). You can also pass a DSL string in the form: "test source spec function" as meaning of Task: test, CodeType: source, -TestType: spec -Tags: function')]
+    HelpMessage = 'Task to execute [test|build|deploy]')]
   [string]
   $TaskType,
 
   # Parameter passed to the Task
   [Parameter(Mandatory = $false,
-    HelpMessage = 'Interactive session? (True|False)')]
+    HelpMessage = 'Interactive session switch [True|False]')]
   [switch]
-  $InteractiveSession
+  $Interactive
 )
 
-# Remove __ if already present
-Remove-Variable -Name __ -Scope Global -Force -ErrorAction SilentlyContinue
+# Load configuration object
+.\config.ps1
 
-$tmp__ = @{}
+### =============================================================================
+### Variables Init
+### =============================================================================
 
-# 1) Module Name
-$tmp__.Add("ModuleName", '<%= $PLASTER_PARAM_ModuleName %>')
+$Scripts = $Global:__.ScriptsFolder
+$ProjectRoot = $Global:__.ProjectRoot
 
-# 1) Paths
-$tmp__.Add("Paths", @{})
-$tmp__.Paths.Add("ProjectRoot", "$PSScriptRoot")
-$tmp__.Paths.Add("SrcFolder", (Join-Path $tmp__.Paths.ProjectRoot "src"))
-$tmp__.Paths.Add("OutputFolder", (Join-Path $tmp__.Paths.ProjectRoot "out"))
-$tmp__.Paths.Add("DocsFolder", (Join-Path $tmp__.Paths.ProjectRoot "docs"))
-$tmp__.Paths.Add("TestFolder", (Join-Path $tmp__.Paths.ProjectRoot "test"))
-$tmp__.Paths.Add("ScriptsFolder", (Join-Path $tmp__.Paths.ProjectRoot "scripts"))
-$tmp__.Paths.Add("BuildFolder", (Join-Path $tmp__.Paths.OutputFolder $tmp__.ModuleName))
-
-$tmp__.Add("DirsToCompile", @( 'private', 'public', 'class' ))
-$tmp__.Add("Files", @{})
-$tmp__.Add("VendorFolder", @{})
-
-# Build the many vendor paths
-foreach ($v in $tmp__.Paths.Keys) {
-  $tmp__.VendorFolder.Add($v, $tmp__.Item($v) + '\vendor' )
-}
-
-# - Dependencies file
-$tmp__.Files.Add("Deps", (Join-Path $tmp__.Paths.SrcFolder '\deps.psd1'))
-
-Set-Variable -Name __ -Description "Global variables for share data in project script." -Value ($tmp__.Clone()) -Option ReadOnly -Scope Global -Force
-
-
-# Parameters decoding
-if ($TaskType.Contains(' ')) {
-  $Script:Parameterized = $true
-
-  $params = $TaskType.Split(' ')
-
-  $Script:Task = $params[0]
-
-  switch ($Script:Task) {
-    "build" {
-      if ($params.Count -gt 1) {
-        $Script:BuildTask = $params[1]
-      }
-      else {
-        $Script:BuildTask = "Default"
-      }
-    }
-    "deploy" {}
-    "test" {
-      switch ($params.Count) {
-        1 {
-          $Script:CodeType = "build"
-          $Script:TestType = "full"
-          $Script:Tags = @()
-          $Script:TestOutPath = $Global:__.Paths.OutputFolder
-        }
-        2 {
-          $Script:CodeType = $params[1]
-          $Script:TestType = "unit"
-          $Script:Tags = @()
-        }
-        3 {
-          $Script:CodeType = $params[1]
-          $Script:TestType = $params[2]
-          $Script:Tags = @()
-        }
-        Default {
-          $Script:CodeType = $params[1]
-          $Script:TestType = $params[2]
-          $Script:Tags = @()
-          if ($params.Count -gt 3) {
-            for ($i = 3; $i -lt $params.Count; $i++) {
-              $Script:Tags += $($params[$i].Replace(',', '')).Replace(' ', '')
-            }
-          }
-        }
-      }
-    }
-    Default {
-      throw "Task not found"
-    }
-  }
-}
-else {
-  $Script:Task = $TaskType
-}
+### =============================================================================
+### Execution
+### =============================================================================
 
 switch ($Script:Task) {
   "build" {
-
     Write-Output "Starting build"
 
     Write-Output "  Install Dependent Modules"
-    Install-Module InvokeBuild, PSDeploy, BuildHelpers, PSScriptAnalyzer, Pester, PSDepend -Scope CurrentUser
+    Install-Module InvokeBuild, BuildHelpers, PSDepend -Scope CurrentUser
 
     Write-Output "  Import Dependent Modules"
     Import-Module InvokeBuild, BuildHelpers, PSScriptAnalyzer
 
+    # BuildHelpers cmdlet
     Set-BuildEnvironment
 
-    if ($Interactive) {
-      # Interactive overwrite actual value
-      $Script:BuildTask = Read-Host "Build task to execute? (Default is 'Default')"
-    }
-
+    # Invoke-Build cmdlet
     Write-Output "  InvokeBuild"
-    Invoke-Build $Script:BuildTask -File "$($Global:__.Paths.ScriptsFolder)\build.ps1" -Result
+    Invoke-Build 'Default' -File "$Scripts\build.ps1" -Result Result
 
     if ($Result.Error) {
       exit 1
@@ -148,28 +95,34 @@ switch ($Script:Task) {
     Set-BuildEnvironment
 
     # PSDeploy cmdlet
-    Invoke-PSDeploy -Path "$($Global:__.Paths.ScriptsFolder)\deploy.ps1" -DeploymentRoot $Global:__.ProjectRoot
+    Invoke-PSDeploy -Path "$Scripts\deploy.ps1" -DeploymentRoot $ProjectRoot
   }
 
   "test" {
-
     Write-Output "Starting test"
 
     Write-Output "  Install Dependent Modules"
-    Install-Module Pester -Scope CurrentUser
+    Install-Module Pester, PSScriptAnalyzer -Scope CurrentUser
 
     Write-Output "  Import Dependent Modules"
-    Import-Module Pester
+    Import-Module Pester, PSScriptAnalyzer -ErrorAction SilentlyContinue
 
-    if ($Interactive) {
-      & "$($Global:__.Paths.ScriptsFolder)\test.ps1"
+    if (!$Interactive) {
+      # Setted for CI/CD pipeline
+      & "$Scripts\test.ps1" -CodeToTest 'build' -TestType 'Full' -Tags $Script:Tags -OutPath $Script:TestOutPath
     }
     else {
-      & "$($Global:__.Paths.ScriptsFolder)\test.ps1" -CodeToTest $Script:CodeType -TestType $Script:TestType -Tags $Script:Tags -OutPath $Script:TestOutPath
+      & "$Scripts\test.ps1"
+    }
+    if ($LASTEXITCODE -eq 0) {
+      exit 0
+    }
+    else {
+      exit 1
     }
   }
   Default {
-    & "$($Global:__.Paths.ScriptsFolder)\test.ps1" -CodeToTest "source" -TestType "unit" -Tags @()
+    & "$Scripts\test.ps1" -CodeToTest "source" -TestType "unit" -Tags @()
   }
 }
 

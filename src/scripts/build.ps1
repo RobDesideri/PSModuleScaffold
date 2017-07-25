@@ -1,25 +1,38 @@
-# TODO: add script CBH
+<#
+.SYNOPSIS
+  Build script for PowerShell modules.
+.DESCRIPTION
+  Retrieve the source code in src folder and build a well formed PS Module directory.
+.EXAMPLE
+  PS C:\> .\build.ps1
+.INPUTS
+  None.
+.OUTPUTS
+  None.
+.NOTES
+  Require:
+  - InvokeBuild module
+  - BuildHelpers module
+    - Set-BuildEnvironment already invoked in project root path
+  - PSDepend module
+  - The __ global variable
+#>
+
 ### =============================================================================
-### Script scoped variables
+### Script variables init
 ### =============================================================================
 
-# InvokeBuild BuidRoot variable
-$BuildRoot = $Global:__.ProjectRoot
-
-# Dirs paths
 $Script:ModuleName = $Global:__.ModuleName
-$Script:Source = $Global:__.SrcFolder
-$Script:Lib = $Global:__.LibFolder.SrcFolder
-$Script:Output = $Global:__.OutputFolder
-$Script:Scripts = $Global:__.ScriptsFolder
-$Script:Build = $Global:__.BuildFolder
-
-# Files path
-$Script:ModulePath = "$Script:Build\$Script:ModuleName.psm1"
-$script:ManifestPath = "$Script:Build\$Script:ModuleName.psd1"
-
-# Dirs to compile
-$Script:DirsToCompile = $Global:__.DirsToCompile
+$Script:Source = $Global:__.Paths.Dir.Src
+$Script:Output = $Global:__.Paths.Dir.Output
+$Script:Scripts = $Global:__.Paths.Dir.Scripts
+$Script:Build = $Global:__.Paths.Dir.Build
+$Script:ModulePath = $Global:__.Paths.File.SrcModule
+$script:ManifestPath = $Global:__.Paths.File.SrcManifest
+$Script:DirsToCompile = $Global:__.SrcDirsToCompile
+$Script:DirsToCopy = $Global:__.SrcDirsToCopy
+$Script:Deps = $Global:__.Paths.File.SrcDeps
+$Script:Version = $Global:__.Paths.File.BuildVersion
 
 ### =============================================================================
 ### InvokeBuild Tasks
@@ -28,32 +41,25 @@ $Script:DirsToCompile = $Global:__.DirsToCompile
 Task Default Require, Clean, CopyToOutput, BuildPSM1, BuildPSD1, UpdateSource
 
 Task Require {
-    Invoke-PSDepend -Path $Script:Source\package.psd1 -Install -Force
+    Invoke-PSDepend -Path $Script:Deps -Install -Force
 }
 
 Task Clean {
-    $null = Remove-Item $Script:Output -Recurse -ErrorAction Ignore
-    $null = New-Item  -Type Directory -Path $Script:Build
+    Remove-Item $Script:Build -Recurse -ErrorAction Ignore | Out-Null
+    New-Item  -Type Directory -Path $Script:Build | Out-Null
 }
 
 Task CopyToOutput {
-
     Write-Output "  Create Directory [$Script:Build]"
-    $null = New-Item -Type Directory -Path $Script:Build -ErrorAction Ignore
-
-    Get-ChildItem $Script:Source -File | 
-        Where-Object name -NotMatch "$Script:ModuleName\.ps[dm]1" | 
-        Copy-Item -Destination $Script:Build -Force -PassThru | 
-        ForEach-Object { "  Create [.{0}]" -f $_.fullname.replace($PSScriptRoot, '')}
+    New-Item -Type Directory -Path $Script:Build -ErrorAction Ignore |Out-Null
 
     Get-ChildItem $Script:Source -Directory | 
-        Where-Object name -NotIn $Script:DirsToCompile | 
+        Where-Object name -In $Script:DirsToCopy | 
         Copy-Item -Destination $Script:Build -Recurse -Force -PassThru | 
         ForEach-Object { "  Create [.{0}]" -f $_.fullname.replace($PSScriptRoot, '')}
 }
 
 Task BuildPSM1 -Inputs (Get-Item "$Script:Source\*\*.ps1") -Outputs $Script:ModulePath {
-
     [System.Text.StringBuilder]$stringbuilder = [System.Text.StringBuilder]::new()    
     foreach ($folder in $Script:DirsToCompile ) {
         [void]$stringbuilder.AppendLine( "Write-Verbose 'Importing from [$Script:Source\$folder]'" )
@@ -67,12 +73,11 @@ Task BuildPSM1 -Inputs (Get-Item "$Script:Source\*\*.ps1") -Outputs $Script:Modu
             }
         }
     }
-    
     Write-Output "  Creating module [$Script:ModulePath]"
     Set-Content -Path  $Script:ModulePath -Value $stringbuilder.ToString() 
 }
 
-Task NextPSGalleryVersion -if (-Not ( Test-Path "$Script:Output\version.xml" ) ) -Before BuildPSD1 {
+Task NextPSGalleryVersion -if (-Not ( Test-Path $Script:Version ) ) -Before BuildPSD1 {
     $galleryVersion = Get-NextPSGalleryVersion -Name $Script:ModuleName
     $galleryVersion | Export-Clixml -Path "$Script:Output\version.xml"
 }
