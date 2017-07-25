@@ -36,7 +36,6 @@
     <message>      Deploying files    </message>
     <file source='src\.gitignore.tml' destination='.gitignore'/>
     <file source='src\appveyor.yml' destination='appveyor.yml'/>
-    <file source='src\console.ps1' destination='console.ps1'/>
     <file source='src\docs\about.md' destination='docs\about.md'/>
     <file source='src\docs\acknowledgements.md' destination='docs\acknowledgements.md'/>
     <file source='src\docs\index.md' destination='docs\index.md'/>
@@ -50,6 +49,7 @@
     <file source='src\test\regression.test.ps1' destination='test\regression.test.ps1'/>
     <file source='src\test\unit.test.ps1' destination='test\unit.test.ps1'/>
     <file source='src\vscode\settings.json' destination='.vscode\settings.json'/>
+    <templateFile source='src\console.ps1' destination='console.ps1'/>
     <templateFile source='src\mkdocs.yml' destination='mkdocs.yml'/>
     <templateFile source='src\PITCHME.md' destination='PITCHME.md'/>
     <templateFile source='src\README.md' destination='README.md'/>

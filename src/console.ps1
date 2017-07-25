@@ -20,7 +20,6 @@ param(
   $InteractiveSession
 )
 
-
 # Remove __ if already present
 Remove-Variable -Name __ -Scope Global -Force -ErrorAction SilentlyContinue
 
@@ -71,9 +70,7 @@ if ($TaskType.Contains(' ')) {
         $Script:BuildTask = "Default"
       }
     }
-    "deploy" {
-      # TODO: Deploy parameters handler
-    }
+    "deploy" {}
     "test" {
       switch ($params.Count) {
         1 {
