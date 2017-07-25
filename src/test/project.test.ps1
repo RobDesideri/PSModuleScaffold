@@ -123,12 +123,12 @@ Describe "Project structure" {
             "$($__.BuildFolder)\*.psm1" | Should Exist
         }
 
-        It "should contains a lib folder only if exists in source" {
-            if (Test-Path "$($__.SrcFolder)\lib") {
-                "$($__.BuildFolder)\lib" | Should Exist
+        It "should contains a vendor folder only if exists in source" {
+            if (Test-Path "$($__.SrcFolder)\vendor") {
+                "$($__.BuildFolder)\vendor" | Should Exist
             }
             else {
-                "$($__.BuildFolder)\lib" | Should Not Exist
+                "$($__.BuildFolder)\vendor" | Should Not Exist
             }
         }
 

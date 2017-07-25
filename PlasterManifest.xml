@@ -23,7 +23,7 @@
     <file source='' destination='.vscode'/>
     <file source='' destination='docs'/>
     <file source='' destination='docs\images'/>
-    <file source='' destination='dist'/>
+    <file source='' destination='out'/>
     <file source='' destination='scripts'/>
     <file source='' destination='src'/>
     <file source='' destination='src\public'/>
@@ -35,19 +35,20 @@
     <file source='' destination='test\spec'/>
     <message>      Deploying files    </message>
     <file source='src\.gitignore.tml' destination='.gitignore'/>
-    <file source='src\appveyor.yml' destination='appveyor.yml'>
+    <file source='src\appveyor.yml' destination='appveyor.yml'/>
     <file source='src\docs\about.md' destination='docs\about.md'/>
     <file source='src\docs\acknowledgements.md' destination='docs\acknowledgements.md'/>
     <file source='src\docs\index.md' destination='docs\index.md'/>
     <file source='src\docs\installation.md' destination='docs\installation.md'/>
-    <file source='src\scripts\build.ps1' destination='scripts\build.pd1'/>
+    <file source='src\scripts\build.ps1' destination='scripts\build.ps1'/>
     <file source='src\scripts\deploy.ps1' destination='scripts\deploy.ps1'/>
     <file source='src\scripts\test.ps1' destination='scripts\test.ps1'/>
-    <file source='src\vscode\settings.json' destination='.vscode\settings.json'/>
+    <file source='src\src\deps.psd1' destination='src\deps.psd1'/>
     <file source='src\test\project.test.ps1' destination='test\project.test.ps1'/>
     <file source='src\test\help.test.ps1' destination='test\help.test.ps1'/>
-    <file source='src\test\regression.test.ps1' destination='regression.test.ps1'/>
-    <file source='src\test\unit.test.ps1' destination='unit.test.ps1'/>
+    <file source='src\test\regression.test.ps1' destination='test\regression.test.ps1'/>
+    <file source='src\test\unit.test.ps1' destination='test\unit.test.ps1'/>
+    <file source='src\vscode\settings.json' destination='.vscode\settings.json'/>
     <templateFile source='src\mkdocs.yml' destination='mkdocs.yml'/>
     <templateFile source='src\PITCHME.md' destination='PITCHME.md'/>
     <templateFile source='src\README.md' destination='README.md'/>
