@@ -1,12 +1,8 @@
 <#
 .SYNOPSIS
-  Test script for PowerShell modules.
-.DESCRIPTION
   Execute selected tests present in test folder.
   This script should not be invoked directly.
-  It is called from the console.ps1 script.
-.INPUTS
-  None.
+  It is called from the automation.ps1 script.
 .OUTPUTS
   If EnableLog is on, create one or more lo files containing the tests results.
 .NOTES
@@ -18,8 +14,8 @@
 param(
   # Code to test (source|build|deployed)
   [Parameter(Mandatory = $true,
-  Position = 0,
-  HelpMessage = '[source|build|deploy]')]
+    Position = 0,
+    HelpMessage = '[source|build|deploy]')]
   [AllowEmptyString()]
   [string]
   $CodeToTest,
@@ -41,8 +37,18 @@ param(
   # Output file
   [Parameter(Mandatory = $false)]
   [switch]
-  $EnableLog
+  $EnableLog,
+  
+  # Script is executed only if this switch is enabled.
+  # This, to avoid it is called directly, without automation.ps1 intermediation.
+  [Parameter(Mandatory = $false)]
+  [switch]
+  $CheckSwitch
 )
+
+if (!$CheckSwitch) {
+  throw "build.ps1 script can't be called directly. Use the automation.ps1 script instead."
+}
 
 ### =============================================================================
 ### Script variables init

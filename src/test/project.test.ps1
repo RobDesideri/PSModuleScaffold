@@ -57,8 +57,8 @@ Describe "Project structure" {
             "$($__.ProjectRoot)\.appveyor.yml" | Should Exist
         }
 
-        It "should contains the console.ps1 file" {
-            "$($__.ProjectRoot)\.console.ps1" | Should Exist
+        It "should contains the automation.ps1 file" {
+            "$($__.ProjectRoot)\.automation.ps1" | Should Exist
         }
 
         It "should contains a test folder" {

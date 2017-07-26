@@ -1,14 +1,8 @@
 <#
 .SYNOPSIS
-  Build script for PowerShell modules.
-.DESCRIPTION
   Retrieve the source code in src folder and build a well formed PS Module directory.
-.EXAMPLE
-  PS C:\> .\build.ps1
-.INPUTS
-  None.
-.OUTPUTS
-  None.
+  This script should not be invoked directly.
+  It is called from the automation.ps1 script
 .NOTES
   Require:
   - InvokeBuild module
@@ -17,6 +11,18 @@
   - PSDepend module
   - The __ global variable
 #>
+
+param(
+  # Script is executed only if this switch is enabled.
+  # This, to avoid it is called directly, without automation.ps1 intermediation.
+  [Parameter(Mandatory = $false)]
+  [switch]
+  $CheckSwitch
+)
+
+if (!$CheckSwitch) {
+  throw "build.ps1 script can't be called directly. Use the automation.ps1 script instead."
+}
 
 ### =============================================================================
 ### Script variables init

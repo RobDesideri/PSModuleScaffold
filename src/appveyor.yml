@@ -14,10 +14,10 @@ skip_commits:
 
 #Kick off the CI/CD pipeline
 build_script:
-  - ps: .\console.ps1 build
+  - ps: .\automation.ps1 build
 
 test_script:
-  - ps: .\console.ps1 test
+  - ps: .\automation.ps1 test
 
 deploy_script:
-  - ps: .\console.ps1 deploy
+  - ps: .\automation.ps1 deploy
