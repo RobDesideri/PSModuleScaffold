@@ -24,29 +24,12 @@ if (!$CheckSwitch) {
   throw "build.ps1 script can't be called directly. Use the automation.ps1 script instead."
 }
 
-### =============================================================================
-### Script variables init
-### =============================================================================
-$Script:Build = $Global:__.Paths.Dir.Build
-
-### =============================================================================
-### Deploy Script
-### =============================================================================
-
 if (
   $ENV:BHBuildSystem -ne 'Unknown' -and 
   $ENV:BHBranchName -eq "master" -and 
   $ENV:BHCommitMessage -match '!deploy'
 ) {
-  Deploy Module {
-    By PSGalleryModule {
-      FromSource $Script:Build
-      To PSGallery
-      WithOptions @{
-        ApiKey = $ENV:NugetApiKey
-      }
-    }
-  }
+  Invoke-PSDeploy -Path $PSScriptRoot -DeploymentRoot $Global:__.Paths.Dir.ProjectRoot
 }
 else {
   "Skipping deployment: To deploy, ensure that...`n" + 

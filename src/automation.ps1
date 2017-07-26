@@ -127,7 +127,7 @@ switch ($Script:Task) {
 
     # Invoke-Build cmdlet
     Write-Output "  InvokeBuild"
-    Invoke-Build 'Default' -File "$Scripts\build.ps1" -Result Result
+    Invoke-Build 'Default' -File "$Scripts\build.ps1" -Result Result -CheckSwitch
 
     if ($Result.Error) {
       exit 1
@@ -150,7 +150,7 @@ switch ($Script:Task) {
     Set-BuildEnvironment
 
     # PSDeploy cmdlet
-    Invoke-PSDeploy -Path "$Scripts\deploy.ps1" -DeploymentRoot $ProjectRoot
+    & "$Scripts\deploy.ps1" -CheckSwitch
   }
 
   "test" {

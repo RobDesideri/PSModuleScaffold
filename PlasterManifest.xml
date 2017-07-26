@@ -42,6 +42,7 @@
     <file source='src\docs\installation.md' destination='docs\installation.md'/>
     <file source='src\scripts\build.ps1' destination='scripts\build.ps1'/>
     <file source='src\scripts\deploy.ps1' destination='scripts\deploy.ps1'/>
+    <file source='src\scripts\psgallery.psdeploy.ps1' destination='scripts\psgallery.psdeploy.ps1'/>
     <file source='src\scripts\test.ps1' destination='scripts\test.ps1'/>
     <file source='src\src\deps.psd1' destination='src\deps.psd1'/>
     <file source='src\test\project.test.ps1' destination='test\project.test.ps1'/>
