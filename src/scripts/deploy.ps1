@@ -1,39 +1,37 @@
+#Requires -Module InvokeBuild, BuildHelpers
+requires BuildRoot, Files, Dirs, Config
+
 <#
 .SYNOPSIS
-  Get the contents of the build folder and publish it to the PSGallery.
-  This script should not be invoked directly.
-  It is called from the automation.ps1 script
+  InvokeBuild bundling tasks.
 .NOTES
-  Require:
-  - PSDeploy module
-  - BuildHelpers module
-    - Set-BuildEnvironment already invoked in project root path
-  - The __ global variable
-  - The ENV:NugetApiKey variable setted
+  Version:        1.0
+  Author:         Roberto Desideri
+  Creation Date:  2017-07-27
+  Purpose/Change: Initial script development
 #>
 
-param(
-  # Script is executed only if this switch is enabled.
-  # This, to avoid it is called directly, without automation.ps1 intermediation.
-  [Parameter(Mandatory = $false)]
-  [switch]
-  $CheckSwitch
-)
+#-----------------------------------------[Dotscourcing]------------------------------------------#
 
-if (!$CheckSwitch) {
-  throw "build.ps1 script can't be called directly. Use the automation.ps1 script instead."
-}
+# Dot-Source configuration variables
+. .\helpers\cfgReader.ps1
+
+# Dot-Source build + test + package + deploy tasks
+foreach($_ in Get-ChildItem -File -Path .\cd\* -Include "*.tasks.ps1" -Recurse) {. $_}
+
+#----------------------------------------[ReleasePipeline]----------------------------------------#
+
+Set-BuildEnvironment -Path $Dirs.ProjectRoot -BuildOutput $Dirs.Build
 
 if (
-  $ENV:BHBuildSystem -ne 'Unknown' -and 
-  $ENV:BHBranchName -eq "master" -and 
-  $ENV:BHCommitMessage -match '!deploy'
+  $ENV:BHBuildSystem -eq 'Unknown' -or 
+  $ENV:BHBranchName -ne "master" -or 
+  $ENV:BHCommitMessage -notmatch '!deploy'
 ) {
-  Invoke-PSDeploy -Path $PSScriptRoot -DeploymentRoot $Global:__.Paths.Dir.ProjectRoot
-}
-else {
   "Skipping deployment: To deploy, ensure that...`n" + 
   "`t* You are in a known build system (Current: $ENV:BHBuildSystem)`n" + 
   "`t* You are committing to the master branch (Current: $ENV:BHBranchName) `n" + 
   "`t* Your commit message includes !deploy (Current: $ENV:BHCommitMessage)"
+}else {
+  Task . Build, Test, Package, Deploy
 }

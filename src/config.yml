@@ -1,0 +1,54 @@
+# ==============================================================================
+# Configuration file
+# NOTE: all paths are relative to project root dir
+# ==============================================================================
+
+##############################
+# Default SEP Configurations #
+#   - Dirs                   #
+#   - Files                  #
+#   - CdCfg                  #
+##############################
+
+# Directores path relative to project root folder
+Dirs:
+  Docs     : docs
+  Out      : out
+  Logs     : out\logs
+  Build    : out\build
+  Src      : src
+  SrcVendor: src\vendor
+  Public   : src\public
+  Scripts  : scripts
+  BuildScr : scripts\build
+  DeployScr: scripts\deploy
+  Specs    : test\specs
+  Tests    : tests
+
+# Files path relative to project root folder
+Files:
+  BuildManifest: out\builds\<%= $PLASTER_PARAM_ModuleName %>\<%= $PLASTER_PARAM_ModuleName %>.psd1
+  BuildModule  : out\builds\<%= $PLASTER_PARAM_ModuleName %>\<%= $PLASTER_PARAM_ModuleName %>.psm1
+  SrcDeps      : src\deps.psd1
+  SrcManifest  : src\<%= $PLASTER_PARAM_ModuleName %>.psd1
+  SrcModule    : src\<%= $PLASTER_PARAM_ModuleName %>.psm1
+  Version      : out\version
+
+CdCfg:
+  Build:
+    SrcPublicFunctionsDir: public
+    SrcDirsToBoundle:
+      - private
+      - public
+      - class
+    SrcDirsToCopy:
+      - data
+      - vendor
+  Test:
+  Deploy:
+
+##############################
+# Ad-hoc proj Configurations #
+##############################
+
+ModuleName: '<%= $PLASTER_PARAM_ModuleName %>'
