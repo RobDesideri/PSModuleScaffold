@@ -15,17 +15,16 @@ requires Files, Dirs, Config, GetPublicFunctionsNames
 
 #-----------------------------------------[LocalHelpers]------------------------------------------#
 
-Task Package UpdateVersion
-
 Task UpdateVersion `
-  SetNewVersion `
+  SetNewVersion, `
   UpdateVersionInManifest, `
   UpdateVersionInSrcManifest, `
   CreateGitTag
 
 
 Task SetNewVersion {
-  $buildManifest = $Files.BuildManifestFile
+  $buildManifest = $Files.BuildManifest
+
   # Get step version type
   $bumpVersionType = 'Build'
   $functions = $GetPublicFunctionsNames.Invoke()
@@ -42,13 +41,14 @@ Task SetNewVersion {
       break
     }
   }
-  New-Object -TypeName 
+
   # Get latest version
   $latestVersion = [version] (Get-Metadata -Path $buildManifest -PropertyName 'ModuleVersion')
   $galleryVersion = Get-NextNugetPackageVersion -Name $Config.ModuleName
   if ( $latestVersion -lt $galleryVersion ) {
     $latestVersion = $galleryVersion
   }
+
   # Set NewVersion variable
   Write-Verbose "  Stepping [$bumpVersionType] version [$latestVersion]"
   $script:NewVersion = [version] (Step-Version $latestVersion -Type $bumpVersionType)

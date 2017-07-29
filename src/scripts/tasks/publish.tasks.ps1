@@ -16,8 +16,6 @@ requires -Environment BHBuildSystem, BHBranchName, BHCommitMessage, NugetApiKey
 
 #---------------------------------------------[Tasks]---------------------------------------------#
 
-Task Deploy PublishOnPSGallery
-
 Task PublishOnPSGallery {
   Invoke-PSDeploy -DeploymentRoot $Dirs.ProjectRoot -Tags PSGallery -Recurse -Force
 }

@@ -1,5 +1,5 @@
 #Requires -Module InvokeBuild
-requires BuildRoot, Files, Dirs, Config
+requires BuildRoot, Files, Dirs, Config, CdBuildCfg
 
 <#
 .SYNOPSIS
@@ -10,14 +10,6 @@ requires BuildRoot, Files, Dirs, Config
   Creation Date:  2017-07-27
   Purpose/Change: Initial script development
 #>
-
-#---------------------------------------[SharedScriptBlocks]--------------------------------------#
-
-$script:GetPublicFunctionsNames = {
-  $functions = Get-ChildItem "$($Dirs.Public)\*.ps1" | 
-    Select-Object -ExpandProperty basename
-  return $functions
-}
 
 #---------------------------------------------[Tasks]---------------------------------------------#
 
@@ -30,10 +22,8 @@ Task CleanBuild {
   $null = New-Item  -Type Directory -Path $dir
 }
 
-Task CopyStaticSrcToBuild {
-  $buildsDir = $Dirs.Builds
-  Write-Verbose " Create '$buildsDir' directory..."
-  New-Item -Type Directory -Path $buildsDir -ErrorAction Ignore | Out-Null
+Task CopyStaticSrcToBuild CleanBuild, {
+  $buildsDir = $Dirs.Build
   Write-Verbose " Copy assets into '$buildsDir' directory..."
   Get-ChildItem $Dirs.Src -Directory | 
     Where-Object name -In $CdBuildCfg.SrcDirsToCopy | 
@@ -44,6 +34,7 @@ Task CopyStaticSrcToBuild {
 }
 
 Task BundlePSM1Module {
+  $src = $Dirs.Src
   [System.Text.StringBuilder]$stringBuilder = [System.Text.StringBuilder]::new()    
   foreach ($folder in $CdBuildCfg.SrcDirsToBoundle ) {
     [void]$stringBuilder.AppendLine( "<# `n # $($Config.ModuleName) module`n#>" )
@@ -58,18 +49,18 @@ Task BundlePSM1Module {
     }
   }
   Write-Verbose "  Creating module '$buildModule'"
-  Set-Content -Path $buildModule -Value $stringBuilder.ToString() 
+  #Set-Content -Path $buildModule -Value $stringBuilder.ToString() # DEBUG: code row disabled for debug purpose
 } `
 -Partial `
 -Inputs (Get-Item "$($Dirs.Src)\*\*.ps1") `
 -Outputs $Files.BuildModule
 
 Task CreatePSD1Manifest {
-  $srcManifest = $Files.SrcManifestFile 
-  $buildManifest = $Files.BuildManifestFile 
+  $srcManifest = $Files.SrcManifest
+  $buildManifest = $Files.BuildManifest
   Write-Verbose "  Update '$buildManifest'"
-  Copy-Item $srcManifest $buildManifest -ErrorAction SilentlyContinue
-  Set-ModuleFunctions -Name $buildManifest -FunctionsToExport $($GetPublicFunctionsNames.Invoke())
+  # Copy-Item $srcManifest $buildManifest | Out-Null # DEBUG: code row disabled for debug purpose
+  # Set-ModuleFunctions -Name $buildManifest -FunctionsToExport $($GetPublicFunctionsNames.Invoke()) # DEBUG: code row disabled for debug purpose
 } `
   -Partial `
   -Inputs (Get-ChildItem $Dirs.src -Recurse -File) `

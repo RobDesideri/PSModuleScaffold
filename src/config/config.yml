@@ -1,0 +1,65 @@
+################################################################################
+# Config: main project configuration file                                      #
+################################################################################
+# ============================================================================ #
+# DESCRIPTION:                                                                 #
+#   This configuration file require the 3 SEP configurations keys:             #
+#     - Dirs:   directories path relative to project root folder               #
+#     - Files:  files path relative to project root folder                     #
+#     - CdCfg:  configurations for CD processes                                #
+#                                                                              #
+# CONSTRAINS:                                                                  #
+#   All paths are relative to project root dir                                 #
+#                                                                              #
+# NOTE:                                                                        #
+#   Version:        1.0.0                                                      #
+#   Author:         Roberto Desideri                                           #
+#   Creation Date:  2017-07-28                                                 #
+#   Purpose/Change: Initial schema version                                     #
+# ============================================================================ #
+
+# ==============================================================================
+# SEP configurations
+# ==============================================================================
+# Directores path relative to project root folder
+Dirs:
+  Docs     : docs
+  Out      : out
+  Logs     : out\logs
+  Build    : out\build
+  Src      : src
+  SrcVendor: src\vendor
+  Public   : src\public
+  Scripts  : scripts
+  BuildScr : scripts\build
+  DeployScr: scripts\deploy
+  Specs    : test\specs
+  Tests    : tests
+  Tmp      : tmp
+
+# Files path relative to project root folder
+Files:
+  BuildManifest: out\builds\<%= $PLASTER_PARAM_ModuleName %>\<%= $PLASTER_PARAM_ModuleName %>.psd1
+  BuildModule  : out\builds\<%= $PLASTER_PARAM_ModuleName %>\<%= $PLASTER_PARAM_ModuleName %>.psm1
+  SrcDeps      : src\deps.psd1
+  SrcManifest  : src\<%= $PLASTER_PARAM_ModuleName %>.psd1
+  SrcModule    : src\<%= $PLASTER_PARAM_ModuleName %>.psm1
+  Version      : out\version
+
+CdCfg:
+  Build:
+    SrcPublicFunctionsDir: public
+    SrcDirsToBoundle:
+      - private
+      - public
+      - class
+    SrcDirsToCopy:
+      - data
+      - vendor
+  Test:
+  Deploy:
+
+# ==============================================================================
+# Ad-hoc configurations
+# ==============================================================================
+ModuleName: '<% $PLASTER_PARAM_ModuleName %>'

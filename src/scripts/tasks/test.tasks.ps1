@@ -33,7 +33,7 @@ function _InvokePesterTest ($TestType) {
 }
 
 function _InvokeGherkinTest {
-  $path = $Dirs.Spec
+  $path = $Dirs.Specs
   Write-Verbose " Acceptance test from $path specs..."
   $result = Invoke-Gherkin -Path $path @GherkinOpts
   _HandleTestResult $result 'Acceptance'
@@ -54,8 +54,6 @@ $script:GherkinOpts = $opts.Clone()
 $GherkinOpts.Add('OutputFile', $(_GetTestFilePath 'Acceptance'))
 
 #---------------------------------------------[Tasks]---------------------------------------------#
-
-Task Test ImportModule, AllTests
 
 Task ImportModule {
   $manifestPath = $Files.BuildManifest

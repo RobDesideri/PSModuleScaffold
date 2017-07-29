@@ -1,0 +1,67 @@
+
+################################################################################
+# Deps: all required dependencies                                              #
+################################################################################
+# ============================================================================ #
+# DESCRIPTION:                                                                 #
+#   This configuration file contains at least 2 main key:                      #
+#     - ScriptDeps:   deps for scripts                                         #
+#     - SrcDeps:      deps for src                                             #
+#                                                                              #
+# SPECIALS:                                                                    #
+#   It is permitted to use this template placehorder in 'Target' key:          #
+#     <% $aVariableName %>                                                     #
+#   where $aVariableName is a variable (or an hastable path) defined in the    #
+#   config.yml file.                                                           #
+#   Examples:                                                                  #
+#     Target: '<% $moduleName %>'                                              #
+#     Target: '<% $Dirs.Src %>'                                                #
+#                                                                              #
+# NOTE:                                                                        #
+#   Version:        1.0.0                                                      #
+#   Author:         Roberto Desideri                                           #
+#   Creation Date:  2017-07-28                                                 #
+#   Purpose/Change: Initial schema version                                     #
+# ============================================================================ #
+
+ScriptDeps:                         # Required key
+  PSDependOptions:                  # Required key
+    Target: 'CurrentUser'           # Required key
+
+  InvokeBuild:
+    Version: latest
+    Tags:
+      - build
+      - test
+      - package
+      - deploy
+
+  BuildHelpers:
+    Version: latest
+    Tags:
+      - package
+      - deploy
+
+  PSDeploy:
+    Version: latest
+    Tags:
+      - deploy
+
+  Pester:
+    Version: latest
+    Tags:
+      - test
+
+  PSScriptAnalyzer:
+    Version: latest
+    Tags:
+      - test
+
+  powershell-yaml:
+    Version: latest
+    Tags:
+      - project
+
+SrcDeps:                            # Required key
+  PSDependOptions:                  # Required key
+    Target: '<% $Dirs.SrcVendor %>' # Required key
