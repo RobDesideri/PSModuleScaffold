@@ -17,6 +17,7 @@
     - CdTestCfg   > configuration for test process
     - CdDeployCfg > configuration for deploy process
     - Config      > all configurations*** as hashtable object
+    - Deps        > dependencies****
 
   If CdCfg contains others automation process, it create also these variables as:
       'Cd' + $ProcessName + 'Cfg'
@@ -24,6 +25,8 @@
   * Files and Dirs values are rewritted as absolute path before insert in variables.
   ** A ProjectRoot key is automatically added to Dirs paths
   *** Paths in main Config variables are not rewrittes, so they are relative path.
+  **** Dependencies are in PSDepend object style. The 'Target' key can contains placeholder as path.
+      See deps.yml for informations.
   
 .NOTES
   Version:        1.0
@@ -48,18 +51,7 @@ param(
   $PassThrough
 )
 
-
-#---------------------------------------------[Deps]----------------------------------------------#
-
-Write-Verbose " Installing Powershell-Yaml module..."
-Install-Module -Name Powershell-Yaml -Scope CurrentUser
-Import-Module Powershell-Yaml -ErrorAction SilentlyContinue
-
-#--------------------------------------------[Settings]--------------------------------------------#
-
-$ErrorActionPreference = 'Stop'
-
-#-----------------------------------------[LocalHelpers]------------------------------------------#
+#-------------------------------------------[Functions]-------------------------------------------#
 
 function _GetPath ($RelPath) {
   return $(Join-Path $script:ProjectRoot $RelPath)
@@ -110,17 +102,23 @@ function _ReplacePlaceholder ($Hashtable) {
 
 #---------------------------------------------[Begin]---------------------------------------------#
 
+$ErrorActionPreference = 'Stop'
+
 $OriginalLocation = Get-Location
 Set-Location $PSScriptRoot
+
 if (!$ProjectRoot) {
   $ProjectRoot = Split-Path $MyInvocation.ScriptName -Parent
 }
 
+# Deps
+Write-Verbose " Installing Powershell-Yaml module..."
+Install-Module -Name Powershell-Yaml -Scope CurrentUser
+Import-Module Powershell-Yaml -ErrorAction SilentlyContinue
+
 #--------------------------------------------[Process]--------------------------------------------#
 
-<#
- # Build private variables
- #>
+# Build private variables
 
 $_config = ConvertFrom-Yaml $(Get-Content .\config.yml -Raw)
 
@@ -138,20 +136,14 @@ $_dirs.Add('ProjectRoot', $ProjectRoot)
 $_deps = ConvertFrom-Yaml $(Get-Content .\deps.yml -Raw)
 $_deps = _ReplacePlaceholder $_deps
 
-<#
- # Create the public shared variables
- #>
+# Create the public shared variables
 
-# Config
 Set-Variable -Name Config -Option ReadOnly -Value $($_config.Clone()) -Force
 
-# Files
 Set-Variable -Name Files -Option ReadOnly -Value $($_files.Clone()) -Force
 
-# Dirs
 Set-Variable -Name Dirs -Option ReadOnly -Value $($_dirs.Clone()) -Force
 
-# CdBuildCfg, CdTestCfg, CdDeployCfg, ...
 foreach ($cKey in $_config.CdCfg.Keys) {
   $val = $_config.CdCfg[$cKey]
   if ($val) {
@@ -159,7 +151,6 @@ foreach ($cKey in $_config.CdCfg.Keys) {
   } 
 }
 
-# Deps
 Set-Variable -Name Deps -Option ReadOnly -Value $($_deps.Clone()) -Force
 
 #----------------------------------------------[End]----------------------------------------------#

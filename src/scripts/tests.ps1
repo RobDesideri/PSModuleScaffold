@@ -10,7 +10,7 @@
   Acceptance test are performed by Gherkin; all others are performed by Pester.
   
   The test name must correspond to basename of test file stored into the .\test directory.
-  You can also pass specified test tags.
+  You can also pass specified test tags and/or scenarios.
 .EXAMPLE
   .\tests.ps1 unit
   Launch all unit tests.
@@ -20,6 +20,10 @@
 .EXAMPLE
   .\tests.ps1 unit function, project
   Launch all unit tests tagged  function and/or project.
+
+.EXAMPLE
+  .\tests.ps1 acceptance -Scenarios myAwesomeScenario
+  Launch acceptance test for myAwesomeScenario scenario.
 .NOTES
   Version:        1.0
   Author:         Roberto Desideri
@@ -69,11 +73,6 @@ if ($TestType -notmatch '.*acceptance.*') {
 else {
   Invoke-Gherkin -Path $Dirs.Specs -Tag -ScenarioName $Scenarios
 }
-
-
-
-
-
 
 #----------------------------------------------[End]----------------------------------------------#
 

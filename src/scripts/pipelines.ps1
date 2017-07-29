@@ -37,6 +37,9 @@ requires Dirs
 $OriginalLocation = Get-Location
 Set-Location $PSScriptRoot
 
+# Dotsource processes
+. .\processes.ps1
+
 #--------------------------------------------[Process]--------------------------------------------#
 
 # Check and launch the process

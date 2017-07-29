@@ -13,8 +13,6 @@ requires BuildRoot, Files, Dirs, Config, CdBuildCfg
 
 #---------------------------------------------[Tasks]---------------------------------------------#
 
-Task Build CleanBuild, CopyStaticSrcToBuild, BundlePSM1Module, CreatePSD1Manifest
-
 Task CleanBuild {
   $dir = $Dirs.Build
   Write-Verbose " Removing $dir directory..."
@@ -49,7 +47,7 @@ Task BundlePSM1Module {
     }
   }
   Write-Verbose "  Creating module '$buildModule'"
-  #Set-Content -Path $buildModule -Value $stringBuilder.ToString() # DEBUG: code row disabled for debug purpose
+  Set-Content -Path $buildModule -Value $stringBuilder.ToString()
 } `
 -Partial `
 -Inputs (Get-Item "$($Dirs.Src)\*\*.ps1") `
@@ -59,8 +57,8 @@ Task CreatePSD1Manifest {
   $srcManifest = $Files.SrcManifest
   $buildManifest = $Files.BuildManifest
   Write-Verbose "  Update '$buildManifest'"
-  # Copy-Item $srcManifest $buildManifest | Out-Null # DEBUG: code row disabled for debug purpose
-  # Set-ModuleFunctions -Name $buildManifest -FunctionsToExport $($GetPublicFunctionsNames.Invoke()) # DEBUG: code row disabled for debug purpose
+  Copy-Item $srcManifest $buildManifest | Out-Null
+  Set-ModuleFunctions -Name $buildManifest -FunctionsToExport $($GetPublicFunctionsNames.Invoke())
 } `
   -Partial `
   -Inputs (Get-ChildItem $Dirs.src -Recurse -File) `

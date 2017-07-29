@@ -18,5 +18,6 @@ requires -Environment BHBuildSystem, BHBranchName, BHCommitMessage, NugetApiKey
 
 Task PublishOnPSGallery {
   Invoke-PSDeploy -DeploymentRoot $Dirs.ProjectRoot -Tags PSGallery -Recurse -Force
+  # TODO: Create psdeploy script.
 }
 

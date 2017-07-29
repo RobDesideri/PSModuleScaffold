@@ -31,8 +31,6 @@ Dirs:
   SrcVendor: src\vendor
   Public   : src\public
   Scripts  : scripts
-  BuildScr : scripts\build
-  DeployScr: scripts\deploy
   Specs    : test\specs
   Tests    : tests
   Tmp      : tmp
@@ -41,7 +39,6 @@ Dirs:
 Files:
   BuildManifest: out\builds\<%= $PLASTER_PARAM_ModuleName %>\<%= $PLASTER_PARAM_ModuleName %>.psd1
   BuildModule  : out\builds\<%= $PLASTER_PARAM_ModuleName %>\<%= $PLASTER_PARAM_ModuleName %>.psm1
-  SrcDeps      : src\deps.psd1
   SrcManifest  : src\<%= $PLASTER_PARAM_ModuleName %>.psd1
   SrcModule    : src\<%= $PLASTER_PARAM_ModuleName %>.psm1
   Version      : out\version
